@@ -129,4 +129,3 @@ def scrape():
     mars["image"]=image
     print(mars)
     return mars
-    #hello
