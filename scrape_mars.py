@@ -2,7 +2,6 @@
 from bs4 import BeautifulSoup
 import requests
 from splinter import Browser
-import
 
 executable_path = {"executable_path": "/usr/local/bin/chromedriver"}
 browser = Browser("chrome", **executable_path, headless=False)
@@ -24,20 +23,21 @@ def scrape_image():
     #JPL Mars Space Images: url of page to be scraped 
     images_url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
     # Retrieve page
-    browser.visit(images_url)  
+    browser.visit(images_url)
+    browser.driver.maximize_window()
     # Create BeautifulSoup object; parse with 'html.parser'
     soup = BeautifulSoup(browser.html, 'html.parser')
     link=soup.find(id= 'full_image')
     #use splinter to click through website to get to desired image
-    click_image = browser.find_by_id('full_image')
+    click_image = browser.find_by_id('full_image')[0]
     click_image.click()
-    browser.is_element_present_by_text("more info", wait_time=5)
+    browser.is_element_present_by_text("more info", wait_time=10)
     more_info = browser.links.find_by_partial_text("more info")
     more_info.click()
     #Recreate soup
     soup = BeautifulSoup(browser.html, 'html.parser')
     result_link = soup.find(class_= 'main_image').get('src')
-    featured_image_url = "https://www.jpl.nasa.org" + result_link
+    featured_image_url = "https://www.jpl.nasa.gov" + result_link
     return {'featured_image': featured_image_url}
 
 def scrape_facts():
