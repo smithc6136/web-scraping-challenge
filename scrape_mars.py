@@ -2,6 +2,7 @@
 from bs4 import BeautifulSoup
 import requests
 from splinter import Browser
+import pandas as pd
 
 executable_path = {"executable_path": "/usr/local/bin/chromedriver"}
 browser = Browser("chrome", **executable_path, headless=False)
@@ -27,11 +28,12 @@ def scrape_image():
     browser.driver.maximize_window()
     # Create BeautifulSoup object; parse with 'html.parser'
     soup = BeautifulSoup(browser.html, 'html.parser')
-    link=soup.find(id= 'full_image')
+    #link=soup.find(id= 'full_image')
+    browser.is_element_present_by_text("full image", wait_time=1)
     #use splinter to click through website to get to desired image
     click_image = browser.find_by_id('full_image')[0]
     click_image.click()
-    browser.is_element_present_by_text("more info", wait_time=10)
+    browser.is_element_present_by_text("more info", wait_time=1)
     more_info = browser.links.find_by_partial_text("more info")
     more_info.click()
     #Recreate soup
@@ -53,79 +55,39 @@ def scrape_facts():
     df.head()
     # Pandas to_html method generates HTML tables from DataFrames.
     html_table = df.to_html()
+    return html_table
 
 def scrape_hemispheres():
     #Mars Hemispheres: URL of page to be scraped
     hemisphere_url='https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
-    # Retrieve page
-    browser.visit(hemisphere_url)
-    # Create BeautifulSoup object; parse with 'html.parser'
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    #CERBERUS HEMISPHERE: use splinter to click through website to get to desired image
-    cerberus_hemisphere = browser.links.find_by_partial_text("Cerberus Hemisphere Enhanced")
-    cerberus_hemisphere.click()
-    #use splinter to click through website to get to desired image
-    cerberus_hemisphere_image = browser.links.find_by_partial_text("Sample")
-    cerberus_hemisphere_image.click()
-    #Recreate soup
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    cerberus_link = soup.find('img').get('src')
-    cerberus_full_link = "https://www.jpl.nasa.gov" + cerberus_link
-    # Retrieve page
-    browser.visit(hemisphere_url)
-
-    # Create BeautifulSoup object; parse with 'html.parser'
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    #SCHIAPARELLI HEMISPHERE: use splinter to click through website to get to desired image
-    Schiaparelli_hemisphere = browser.links.find_by_partial_text("Schiaparelli Hemisphere Enhanced")
-    Schiaparelli_hemisphere.click()
-    #use splinter to click through website to get to desired image
-    Schiaparelli_hemisphere_image = browser.links.find_by_partial_text("Sample")
-    Schiaparelli_hemisphere_image.click()
-    #Recreate soup
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    Schiaparelli_link = soup.find('img').get('src')
-    Schiaparelli_full_link = "https://www.jpl.nasa.gov" + Schiaparelli_link
-    # Retrieve page
-    browser.visit(hemisphere_url)
-
-
-    # Create BeautifulSoup object; parse with 'html.parser'
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    #SYRTIS MAJOR HEMISPHERE: use splinter to click through website to get to desired image
-    Syrtis_Major_hemisphere = browser.links.find_by_partial_text("Syrtis Major Hemisphere Enhanced")
-    Syrtis_Major_hemisphere.click()
-    #use splinter to click through website to get to desired image
-    Syrtis_Major_hemisphere_image = browser.links.find_by_partial_text("Sample")
-    Syrtis_Major_hemisphere_image.click()
-    #Recreate soup
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    Syrtis_Major_link = soup.find('img').get('src')
-    Syrtis_Major_full_link = "https://www.jpl.nasa.gov" + Syrtis_Major_link
-    # Retrieve page
-    browser.visit(hemisphere_url)
-
-    # Create BeautifulSoup object; parse with 'html.parser'
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    #VALLES MARINERIS HEMISPHERE: use splinter to click through website to get to desired image
-    Valles_Marineris_hemisphere = browser.links.find_by_partial_text("Valles Marineris Hemisphere Enhanced")
-    Valles_Marineris_hemisphere.click()
-    #use splinter to click through website to get to desired image
-    Valles_Marineris_hemisphere_image = browser.links.find_by_partial_text("Sample")
-    Valles_Marineris_hemisphere_image.click()
-    #Recreate soup
-    soup = BeautifulSoup(browser.html, 'html.parser')
-    Valles_Marineris_link = soup.find('img').get('src')
-    Valles_Marineris_full_link = "https://www.jpl.nasa.gov" + Valles_Marineris_link
-
+    hemispheres = ["Cerberus", "Schiaparelli", "Syrtis Major", "Valles Marineris"]
+    links = []
+    for hemisphere in hemispheres:
+        # Retrieve page
+        browser.visit(hemisphere_url)
+        # Create BeautifulSoup object; parse with 'html.parser'
+        soup = BeautifulSoup(browser.html, 'html.parser')
+        #use splinter to click through website to get to desired image
+        hemi = browser.links.find_by_partial_text(f"{hemisphere} Hemisphere Enhanced")
+        hemi.click()
+        #use splinter to click through website to get to desired image
+        hemisphere_image = browser.links.find_by_partial_text("Sample")["href"]
+        links.append(hemisphere_image)
+    return links
 
 def scrape():
     news = scrape_news()
     image = scrape_image()
+    facts = scrape_facts()
+    hemispheres = scrape_hemispheres()
     print(news)
     print(image)
+    print(facts)
+    print(hemispheres)
     mars={}
     mars["news"]=news
     mars["image"]=image
+    mars["facts"]=facts
+    mars["hemispheres"]=hemispheres
     print(mars)
     return mars
