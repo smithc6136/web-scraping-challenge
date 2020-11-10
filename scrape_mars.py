@@ -1,3 +1,5 @@
+## CODE NOT WORKING ANYMORE BECAUSE WEBSITE STRUCTURE CHANGED. WAS WORKING BEFORE
+
 # Dependencies
 from bs4 import BeautifulSoup
 import requests
@@ -29,11 +31,11 @@ def scrape_image():
     # Create BeautifulSoup object; parse with 'html.parser'
     soup = BeautifulSoup(browser.html, 'html.parser')
     #link=soup.find(id= 'full_image')
-    browser.is_element_present_by_text("full image", wait_time=1)
+    browser.is_element_present_by_text("full image", wait_time=10)
     #use splinter to click through website to get to desired image
     click_image = browser.find_by_id('full_image')[0]
     click_image.click()
-    browser.is_element_present_by_text("more info", wait_time=1)
+    browser.is_element_present_by_text("more info", wait_time=10)
     more_info = browser.links.find_by_partial_text("more info")
     more_info.click()
     #Recreate soup
